@@ -1,6 +1,10 @@
 import { Hono } from 'hono'
 
-const app = new Hono()
+type Bindings = {
+  KV: KVNamespace
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
@@ -8,13 +12,13 @@ app.get('/', (c) => {
 
 const scheduledTask = async (
   _controller: ScheduledController,
-  _env: unknown,
+  _env: Bindings,
   _c: ExecutionContext,
 ) => {
   // TODO
 }
 
-const scheduled: ExportedHandlerScheduledHandler = async (
+const scheduled: ExportedHandlerScheduledHandler<Bindings> = async (
   controller,
   env,
   c,
