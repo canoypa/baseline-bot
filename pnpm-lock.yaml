@@ -16,6 +16,9 @@ devDependencies:
   '@cloudflare/workers-types':
     specifier: ^4.20240529.0
     version: 4.20240603.0
+  web-features:
+    specifier: ^0.8.5
+    version: 0.8.5
   wrangler:
     specifier: ^3.57.2
     version: 3.59.0(@cloudflare/workers-types@4.20240603.0)
@@ -805,6 +808,10 @@ packages:
     engines: {node: '>=14.0'}
     dependencies:
       '@fastify/busboy': 2.1.1
+    dev: true
+
+  /web-features@0.8.5:
+    resolution: {integrity: sha512-7fWu/SaGFZYRNDDDBlHQUNkS9lHzYPLIxeSATzcLxuxvfaK0ELgFxi1lHF/W1cmcBNZA9Q1aCi6wUOxLlAkOfw==}
     dev: true
 
   /workerd@1.20240524.0:
