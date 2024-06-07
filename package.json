@@ -5,7 +5,8 @@
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
-    "hono": "^4.4.2"
+    "hono": "^4.4.2",
+    "misskey-js": "^2024.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
