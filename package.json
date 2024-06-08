@@ -11,6 +11,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.8.0",
     "@cloudflare/workers-types": "^4.20240529.0",
+    "vitest": "^1.6.0",
     "web-features": "^0.8.5",
     "wrangler": "^3.57.2"
   }
