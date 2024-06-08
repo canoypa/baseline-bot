@@ -9,11 +9,11 @@ app.get('/', (c) => {
 })
 
 const scheduled: ExportedHandlerScheduledHandler<Bindings> = async (
-  controller,
+  event,
   env,
   c,
 ) => {
-  c.waitUntil(scheduledTask(controller, env, c))
+  c.waitUntil(scheduledTask(event, env, c))
 }
 
 export default {
