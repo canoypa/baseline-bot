@@ -8,9 +8,6 @@ dependencies:
   hono:
     specifier: ^4.4.2
     version: 4.4.3
-  misskey-js:
-    specifier: ^2024.5.0
-    version: 2024.5.0
 
 devDependencies:
   '@biomejs/biome':
@@ -1040,10 +1037,6 @@ packages:
       '@types/estree': 1.0.5
     dev: true
 
-  /eventemitter3@5.0.1:
-    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
-    dev: false
-
   /execa@8.0.1:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
@@ -1234,13 +1227,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /misskey-js@2024.5.0:
-    resolution: {integrity: sha512-Bm5tAGIKsPzIH51MCBMbmtggxC/BsIBLv2vYAfQV0LQd9/UEu5ujOsH5p7U+UN5toCTwj50uYxa5Zj9mTbV9eg==}
-    dependencies:
-      eventemitter3: 5.0.1
-      reconnecting-websocket: 4.4.0
-    dev: false
-
   /mlly@1.7.1:
     resolution: {integrity: sha512-rrVRZRELyQzrIUAVMHxP97kv+G786pHmOKzuFII8zDYahFBS7qnHh2AlYSl1GAHhaMPCz6/oHjVMcfFYgFYHgA==}
     dependencies:
@@ -1371,10 +1357,6 @@ packages:
     dependencies:
       picomatch: 2.3.1
     dev: true
-
-  /reconnecting-websocket@4.4.0:
-    resolution: {integrity: sha512-D2E33ceRPga0NvTDhJmphEgJ7FUYF0v4lr1ki0csq06OdlxKfugGzN0dSkxM/NfqCxYELK4KcaTOUOjTV6Dcng==}
-    dev: false
 
   /resolve.exports@2.0.2:
     resolution: {integrity: sha512-X2UW6Nw3n/aMgDVy+0rSqgHlv39WZAlZrXCdnbyEiKm17DSqHX4MmQMaST3FbeWR5FTuRcUwYAziZajji0Y7mg==}
