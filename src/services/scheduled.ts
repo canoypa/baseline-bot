@@ -113,7 +113,7 @@ export const scheduledTask = async (
       credential: env.MISSKEY_TOKEN,
     })
     misskey.request('notes/create', {
-      visibility: 'home',
+      visibility: 'specified',
       text: noteContent,
     })
   }
