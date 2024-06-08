@@ -1,22 +1,12 @@
 import { Hono } from 'hono'
-
-type Bindings = {
-  KV: KVNamespace
-}
+import type { Bindings } from './env'
+import { scheduledTask } from './services/scheduled'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
-
-const scheduledTask = async (
-  _controller: ScheduledController,
-  _env: Bindings,
-  _c: ExecutionContext,
-) => {
-  // TODO
-}
 
 const scheduled: ExportedHandlerScheduledHandler<Bindings> = async (
   controller,
