@@ -5,6 +5,7 @@
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
+    "fuse.js": "^7.0.0",
     "hono": "^4.4.2"
   },
   "devDependencies": {
