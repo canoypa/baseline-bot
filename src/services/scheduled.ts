@@ -4,10 +4,8 @@ import {
   type BaselineIdentifier,
   type BrowserIdentifier,
   type SupportBrowser,
-  type SupportStatus,
   type WebFeature,
   type WebFeatures,
-  fetchWebFeatures,
 } from '../web_features'
 
 export type KvStore = {
@@ -15,11 +13,41 @@ export type KvStore = {
   support: BrowserIdentifier[]
 }
 
-export const isStatusChanged = (prev: KvStore, current: SupportStatus) => {
-  return (
-    prev.baseline !== current.baseline ||
-    arrayDifference(Object.keys(current.support), prev.support).length > 0
-  )
+export const getUpdatedFeatures = (
+  previousFeatures: WebFeatures,
+  latestFeatures: WebFeatures,
+) => {
+  const result: WebFeature[] = []
+
+  for (const key in latestFeatures) {
+    const latest = latestFeatures[key]
+    const previous = previousFeatures[key]
+
+    // New feature
+    if (!previous) {
+      result.push(latest)
+      continue
+    }
+
+    // Baseline status changed
+    if (latest.status.baseline !== previous.status.baseline) {
+      result.push(latest)
+      continue
+    }
+
+    // Browser support changed
+    if (
+      arrayDifference(
+        Object.keys(latest.status.support),
+        Object.keys(previous.status.support),
+      ).length > 0
+    ) {
+      result.push(latest)
+      continue
+    }
+  }
+
+  return result
 }
 
 export const getBrowserSupports = (support: SupportBrowser) => {
@@ -74,26 +102,8 @@ ${feature.description}
   return content
 }
 
-const notify = async (
-  features: WebFeatures,
-  previous: Record<string, KvStore>,
-  env: Bindings,
-) => {
-  for (const key in features) {
-    const feature = features[key]
-    const prev = previous[key]
-
-    if (
-      // 以前から high のもの、新規のものは通知しない、以前の値がないことで確認
-      !prev ||
-      // ステータスが変わっていないものは通知しない
-      !isStatusChanged(prev, feature.status)
-    ) {
-      continue
-    }
-
-    const noteContent = getNoteContent(feature)
-
+const notify = async (features: WebFeature[], env: Bindings) => {
+  for (const feature of features) {
     await fetch('https://misskey.io/api/notes/create', {
       method: 'POST',
       headers: {
@@ -102,7 +112,7 @@ const notify = async (
       },
       body: JSON.stringify({
         visibility: 'home',
-        text: noteContent,
+        text: getNoteContent(feature),
       }),
     })
       .then((res) => {
@@ -118,57 +128,29 @@ const notify = async (
   }
 }
 
-const updateKv = async (
-  features: WebFeatures,
-  previous: Record<string, KvStore>,
-  env: Bindings,
-) => {
-  for (const key in features) {
-    const feature = features[key]
-
-    // ステータスに変更がないものは更新しない
-    if (!isStatusChanged(previous[key], feature.status)) {
-      continue
-    }
-
-    // high のものは削除する
-    if (feature.status.baseline === 'high') {
-      const prev = previous[key]
-
-      if (!prev) {
-        continue
-      }
-
-      await env.KV.delete(key)
-    }
-
-    const value: KvStore = {
-      baseline: feature.status.baseline,
-      support: Object.keys(feature.status.support) as BrowserIdentifier[],
-    }
-
-    await env.KV.put(key, JSON.stringify(value))
-  }
-}
-
 export const scheduledTask = async (
   _controller: ScheduledController,
   env: Bindings,
   _c: ExecutionContext,
 ) => {
-  const features = await fetchWebFeatures()
+  const previousFeaturesVersion = await env.KV.get('previousVersion')
 
-  const kvList = await env.KV.list()
-  const previous = Object.fromEntries(
-    await Promise.all(
-      kvList.keys.map(async (key) => {
-        const value = await env.KV.get<KvStore>(key.name, 'json')
-        if (!value) throw new Error('kv value is not found')
-        return [key.name, value]
-      }),
-    ),
-  ) as Record<string, KvStore>
+  const latestPackage = await fetch(
+    'https://www.unpkg.com/web-features@latest/package.json',
+  ).then((r) => r.json() as Promise<{ version: string }>)
+  const latestFeaturesVersion = latestPackage.version
 
-  await notify(features, previous, env)
-  await updateKv(features, previous, env)
+  const previousFeatures = await fetch(
+    `https://www.unpkg.com/web-features@${previousFeaturesVersion}/index.json`,
+  ).then((r) => r.json() as Promise<WebFeatures>)
+
+  const latestFeatures = await fetch(
+    `https://www.unpkg.com/web-features@${latestFeaturesVersion}/index.json`,
+  ).then((r) => r.json() as Promise<WebFeatures>)
+
+  const updatedFeatures = getUpdatedFeatures(previousFeatures, latestFeatures)
+
+  await notify(updatedFeatures, env)
+
+  await env.KV.put('previousVersion', latestFeaturesVersion)
 }

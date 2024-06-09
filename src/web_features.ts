@@ -40,11 +40,3 @@ export type WebFeature = {
 export type WebFeatures = {
   [id: string]: WebFeature
 }
-
-export const fetchWebFeatures = async () => {
-  const res = await fetch(
-    'https://www.unpkg.com/web-features@latest/index.json',
-  ).then((r) => r.json() as Promise<WebFeatures>)
-
-  return res
-}

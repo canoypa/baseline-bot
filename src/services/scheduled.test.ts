@@ -1,53 +1,172 @@
 import { describe, expect, it } from 'vitest'
-import type { SupportBrowser, SupportStatus, WebFeature } from '../web_features'
+import type { SupportBrowser, WebFeature, WebFeatures } from '../web_features'
 import {
-  type KvStore,
   getBrowserSupports,
   getNoteContent,
-  isStatusChanged,
+  getUpdatedFeatures,
 } from './scheduled'
 
-describe('isStatusChanged', () => {
-  it('should return false if the status has not changed', () => {
-    const prev: KvStore = {
-      baseline: 'high',
-      support: ['chrome'],
+describe('getUpdatedFeatures', () => {
+  it('should return empty array when there are no updates', () => {
+    const previousFeatures: WebFeatures = {
+      'feature-1': {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: 'high',
+          support: {},
+        },
+        spec: [],
+      },
+      'feature-2': {
+        name: 'Feature 2',
+        description: 'Feature 2 description',
+        description_html: 'Feature 2 description',
+        status: {
+          baseline: 'low',
+          support: { chrome: '0' },
+        },
+        spec: [],
+      },
     }
 
-    const current: SupportStatus = {
-      baseline: 'high',
-      support: { chrome: '0' },
+    const latestFeatures: WebFeatures = {
+      'feature-1': {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: 'high',
+          support: {},
+        },
+        spec: [],
+      },
+      'feature-2': {
+        name: 'Feature 2',
+        description: 'Feature 2 description',
+        description_html: 'Feature 2 description',
+        status: {
+          baseline: 'low',
+          support: { chrome: '0' },
+        },
+        spec: [],
+      },
     }
 
-    expect(isStatusChanged(prev, current)).toBe(false)
+    expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([])
   })
 
-  it('should return true if the baseline has changed', () => {
-    const prev: KvStore = {
-      baseline: false,
-      support: [],
+  it('should return updated features when there are baseline updates', () => {
+    const previousFeatures: WebFeatures = {
+      'feature-1': {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: 'low',
+          support: {},
+        },
+        spec: [],
+      },
+      'feature-2': {
+        name: 'Feature 2',
+        description: 'Feature 2 description',
+        description_html: 'Feature 2 description',
+        status: {
+          baseline: false,
+          support: {},
+        },
+        spec: [],
+      },
     }
 
-    const current: SupportStatus = {
-      baseline: 'low',
-      support: {},
+    const latestFeatures: WebFeatures = {
+      'feature-1': {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: 'high',
+          support: {},
+        },
+        spec: [],
+      },
+      'feature-2': {
+        name: 'Feature 2',
+        description: 'Feature 2 description',
+        description_html: 'Feature 2 description',
+        status: {
+          baseline: 'low',
+          support: {},
+        },
+        spec: [],
+      },
     }
 
-    expect(isStatusChanged(prev, current)).toBe(true)
+    expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([
+      {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: 'high',
+          support: {},
+        },
+        spec: [],
+      },
+      {
+        name: 'Feature 2',
+        description: 'Feature 2 description',
+        description_html: 'Feature 2 description',
+        status: {
+          baseline: 'low',
+          support: {},
+        },
+        spec: [],
+      },
+    ])
   })
 
-  it('should return true if the support has changed', () => {
-    const prev: KvStore = {
-      baseline: false,
-      support: ['chrome'],
+  it('should return updated features when there are browser support updates', () => {
+    const previousFeatures: WebFeatures = {
+      'feature-1': {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: false,
+          support: {},
+        },
+        spec: [],
+      },
     }
 
-    const current: SupportStatus = {
-      baseline: false,
-      support: { chrome: '0', chrome_android: '0' },
+    const latestFeatures: WebFeatures = {
+      'feature-1': {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: false,
+          support: { chrome: '0' },
+        },
+        spec: [],
+      },
     }
 
-    expect(isStatusChanged(prev, current)).toBe(true)
+    expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([
+      {
+        name: 'Feature 1',
+        description: 'Feature 1 description',
+        description_html: 'Feature 1 description',
+        status: {
+          baseline: false,
+          support: { chrome: '0' },
+        },
+        spec: [],
+      },
+    ])
   })
 })
 

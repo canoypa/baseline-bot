@@ -1,8 +1,10 @@
 import Fuse from 'fuse.js'
-import { fetchWebFeatures } from '../web_features'
+import { type WebFeatures } from '../web_features'
 
 export const searchFeature = async (query: string) => {
-  const features = await fetchWebFeatures()
+  const features = await fetch(
+    'https://www.unpkg.com/web-features@latest/index.json',
+  ).then((r) => r.json() as Promise<WebFeatures>)
 
   const fuse = new Fuse(Object.values(features), {
     keys: ['name', 'description'],
