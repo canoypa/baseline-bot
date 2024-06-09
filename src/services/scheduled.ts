@@ -125,6 +125,9 @@ const notify = async (features: WebFeature[], env: Bindings) => {
       .catch((e) => {
         console.error(e)
       })
+
+    // 負荷にならないように1秒待つ
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 }
 
