@@ -143,6 +143,10 @@ export const scheduledTask = async (
   ).then((r) => r.json() as Promise<{ version: string }>)
   const latestFeaturesVersion = latestPackage.version
 
+  if (previousFeaturesVersion === latestFeaturesVersion) {
+    return
+  }
+
   const previousFeatures = await fetch(
     `https://www.unpkg.com/web-features@${previousFeaturesVersion}/index.json`,
   ).then((r) => r.json() as Promise<WebFeatures>)
