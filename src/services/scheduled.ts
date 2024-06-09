@@ -1,4 +1,3 @@
-import { APIClient } from 'misskey-js/api.js'
 import type { Bindings } from '../env'
 import { arrayDifference } from '../utils/array_difference'
 import {
@@ -7,6 +6,7 @@ import {
   type SupportBrowser,
   type SupportStatus,
   type WebFeature,
+  type WebFeatures,
   fetchWebFeatures,
 } from '../web_features'
 
@@ -74,25 +74,11 @@ ${feature.description}
   return content
 }
 
-export const scheduledTask = async (
-  _controller: ScheduledController,
+const notify = async (
+  features: WebFeatures,
+  previous: Record<string, KvStore>,
   env: Bindings,
-  _c: ExecutionContext,
 ) => {
-  const features = await fetchWebFeatures()
-
-  const kvList = await env.KV.list()
-  const previous = Object.fromEntries(
-    await Promise.all(
-      kvList.keys.map(async (key) => {
-        const value = await env.KV.get<KvStore>(key.name, 'json')
-        if (!value) throw new Error('kv value is not found')
-        return [key.name, value]
-      }),
-    ),
-  ) as Record<string, KvStore>
-
-  // 通知処理
   for (const key in features) {
     const feature = features[key]
     const prev = previous[key]
@@ -108,19 +94,42 @@ export const scheduledTask = async (
 
     const noteContent = getNoteContent(feature)
 
-    const misskey = new APIClient({
-      origin: 'misskey.io',
-      credential: env.MISSKEY_TOKEN,
+    await fetch('https://misskey.io/api/notes/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
+      },
+      body: JSON.stringify({
+        visibility: 'home',
+        text: noteContent,
+      }),
     })
-    misskey.request('notes/create', {
-      visibility: 'specified',
-      text: noteContent,
-    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to create note: ${res.statusText}`)
+        return res.json()
+      })
+      .then((data) => {
+        console.log(data)
+      })
+      .catch((e) => {
+        console.error(e)
+      })
   }
+}
 
-  // 次回更新検出用に kv を更新する
+const updateKv = async (
+  features: WebFeatures,
+  previous: Record<string, KvStore>,
+  env: Bindings,
+) => {
   for (const key in features) {
     const feature = features[key]
+
+    // ステータスに変更がないものは更新しない
+    if (!isStatusChanged(previous[key], feature.status)) {
+      continue
+    }
 
     // high のものは削除する
     if (feature.status.baseline === 'high') {
@@ -140,4 +149,26 @@ export const scheduledTask = async (
 
     await env.KV.put(key, JSON.stringify(value))
   }
+}
+
+export const scheduledTask = async (
+  _controller: ScheduledController,
+  env: Bindings,
+  _c: ExecutionContext,
+) => {
+  const features = await fetchWebFeatures()
+
+  const kvList = await env.KV.list()
+  const previous = Object.fromEntries(
+    await Promise.all(
+      kvList.keys.map(async (key) => {
+        const value = await env.KV.get<KvStore>(key.name, 'json')
+        if (!value) throw new Error('kv value is not found')
+        return [key.name, value]
+      }),
+    ),
+  ) as Record<string, KvStore>
+
+  await notify(features, previous, env)
+  await updateKv(features, previous, env)
 }
