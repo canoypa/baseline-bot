@@ -217,9 +217,9 @@ describe('getNoteContent', () => {
       spec: [],
     }
 
-    expect(getNoteContent(feature)).toBe(`✅ Widely available!
+    expect(getNoteContent(feature)).toBe(`Feature name
 
-Feature name
+✅ Widely available!
 ----
 Feature description
 `)
@@ -237,9 +237,9 @@ Feature description
       spec: [],
     }
 
-    expect(getNoteContent(feature)).toBe(`☑️ Newly available!
+    expect(getNoteContent(feature)).toBe(`Feature name
 
-Feature name
+☑️ Newly available!
 ----
 Feature description
 `)
@@ -257,10 +257,10 @@ Feature description
       spec: [],
     }
 
-    expect(getNoteContent(feature)).toBe(`⚠️ Limited availability!
-Chrome ✅ / Edge ❌ / Firefox ❌ / Safari ❌
+    expect(getNoteContent(feature)).toBe(`Feature name
 
-Feature name
+⚠️ Limited availability!
+Chrome ✅ / Edge ❌ / Firefox ❌ / Safari ❌
 ----
 Feature description
 `)

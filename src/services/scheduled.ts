@@ -62,9 +62,9 @@ export const getBrowserSupports = (support: SupportBrowser) => {
 
 export const getNoteContent = (feature: WebFeature) => {
   if (feature.status.baseline === 'high') {
-    const content = `✅ Widely available!
+    const content = `${feature.name}
 
-${feature.name}
+✅ Widely available!
 ----
 ${feature.description}
 `
@@ -73,9 +73,9 @@ ${feature.description}
   }
 
   if (feature.status.baseline === 'low') {
-    const content = `☑️ Newly available!
+    const content = `${feature.name}
 
-${feature.name}
+☑️ Newly available!
 ----
 ${feature.description}
 `
@@ -89,12 +89,12 @@ ${feature.description}
     return status ? '✅' : '❌'
   }
 
-  const content = `⚠️ Limited availability!
+  const content = `${feature.name}
+
+⚠️ Limited availability!
 Chrome ${emoji(support.chrome)} / Edge ${emoji(
     support.edge,
   )} / Firefox ${emoji(support.firefox)} / Safari ${emoji(support.safari)}
-
-${feature.name}
 ----
 ${feature.description}
 `
