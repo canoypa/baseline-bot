@@ -1,5 +1,4 @@
 import type { Bindings } from '../env'
-import { arrayDifference } from '../utils/array_difference'
 import {
   type BaselineIdentifier,
   type BrowserIdentifier,
@@ -37,10 +36,9 @@ export const getUpdatedFeatures = (
 
     // Browser support changed
     if (
-      arrayDifference(
-        Object.keys(latest.status.support),
-        Object.keys(previous.status.support),
-      ).length > 0
+      new Set(Object.keys(latest.status.support)).difference(
+        new Set(Object.keys(previous.status.support)),
+      ).size > 0
     ) {
       result.push(latest)
       continue
