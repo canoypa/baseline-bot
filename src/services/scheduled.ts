@@ -87,7 +87,7 @@ export const getNoteContent = (feature: WebFeature) => {
   content += `----\n${feature.description}\n\n`
 
   if (feature.caniuse) {
-    content += `caniuse: ${feature.caniuse}\n`
+    content += `caniuse: https://caniuse.com/${feature.caniuse}\n`
   }
 
   if (typeof feature.spec === 'string') {
