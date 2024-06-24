@@ -59,43 +59,42 @@ export const getBrowserSupports = (support: SupportBrowser) => {
 }
 
 export const getNoteContent = (feature: WebFeature) => {
+  let content = `${feature.name}\n\n`
+
   if (feature.status.baseline === 'high') {
-    const content = `${feature.name}
-
-✅ Widely available!
-----
-${feature.description}
-`
-
-    return content
+    content += `✅ Widely available!\n`
   }
 
   if (feature.status.baseline === 'low') {
-    const content = `${feature.name}
-
-☑️ Newly available!
-----
-${feature.description}
-`
-
-    return content
+    content += `☑️ Newly available!\n`
   }
 
-  const support = getBrowserSupports(feature.status.support)
+  if (feature.status.baseline === false) {
+    const emoji = (status: boolean) => {
+      return status ? '✅' : '❌'
+    }
 
-  const emoji = (status: boolean) => {
-    return status ? '✅' : '❌'
+    content += `⚠️ Limited availability!\n`
+
+    const support = getBrowserSupports(feature.status.support)
+
+    content += `Chrome ${emoji(support.chrome)} / `
+    content += `Edge ${emoji(support.edge)} / `
+    content += `Firefox ${emoji(support.firefox)} / `
+    content += `Safari ${emoji(support.safari)}\n`
   }
 
-  const content = `${feature.name}
+  content += `----\n${feature.description}\n\n`
 
-⚠️ Limited availability!
-Chrome ${emoji(support.chrome)} / Edge ${emoji(
-    support.edge,
-  )} / Firefox ${emoji(support.firefox)} / Safari ${emoji(support.safari)}
-----
-${feature.description}
-`
+  if (feature.caniuse) {
+    content += `caniuse: ${feature.caniuse}\n`
+  }
+
+  if (typeof feature.spec === 'string') {
+    content += `spec: ${feature.spec}`
+  } else {
+    content += feature.spec.reduce((acc, s) => `${acc}\n    - ${s}`, 'spec:')
+  }
 
   return content
 }
