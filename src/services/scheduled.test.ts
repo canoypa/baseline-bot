@@ -214,7 +214,7 @@ describe('getNoteContent', () => {
         baseline: 'high',
         support: {},
       },
-      spec: [],
+      spec: 'https://example.com',
     }
 
     expect(getNoteContent(feature)).toBe(`Feature name
@@ -222,7 +222,8 @@ describe('getNoteContent', () => {
 ✅ Widely available!
 ----
 Feature description
-`)
+
+spec: https://example.com`)
   })
 
   it('should return a note content for a feature with low baseline', () => {
@@ -234,7 +235,7 @@ Feature description
         baseline: 'low',
         support: {},
       },
-      spec: [],
+      spec: 'https://example.com',
     }
 
     expect(getNoteContent(feature)).toBe(`Feature name
@@ -242,7 +243,8 @@ Feature description
 ☑️ Newly available!
 ----
 Feature description
-`)
+
+spec: https://example.com`)
   })
 
   it('should return a note content for a feature with limited availability', () => {
@@ -254,7 +256,7 @@ Feature description
         baseline: false,
         support: { chrome: '0', chrome_android: '0' },
       },
-      spec: [],
+      spec: 'https://example.com',
     }
 
     expect(getNoteContent(feature)).toBe(`Feature name
@@ -263,6 +265,53 @@ Feature description
 Chrome ✅ / Edge ❌ / Firefox ❌ / Safari ❌
 ----
 Feature description
-`)
+
+spec: https://example.com`)
+  })
+
+  it('should return a note content with multiple specs', () => {
+    const feature: WebFeature = {
+      name: 'Feature name',
+      description: 'Feature description',
+      description_html: 'Feature description',
+      status: {
+        baseline: 'high',
+        support: {},
+      },
+      spec: ['https://1.example.com', 'https://2.example.com'],
+    }
+
+    expect(getNoteContent(feature)).toBe(`Feature name
+
+✅ Widely available!
+----
+Feature description
+
+spec:
+    - https://1.example.com
+    - https://2.example.com`)
+  })
+
+  it('should return a note content with caniuse', () => {
+    const feature: WebFeature = {
+      name: 'Feature name',
+      description: 'Feature description',
+      description_html: 'Feature description',
+      status: {
+        baseline: 'high',
+        support: {},
+      },
+      spec: 'https://example.com',
+      caniuse: 'https://caniuse.exmaple.com',
+    }
+
+    expect(getNoteContent(feature)).toBe(`Feature name
+
+✅ Widely available!
+----
+Feature description
+
+caniuse: https://caniuse.exmaple.com
+spec: https://example.com`)
   })
 })
