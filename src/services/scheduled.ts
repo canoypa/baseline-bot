@@ -145,14 +145,19 @@ export const scheduledTask = async (
   }
 
   const previousFeatures = await fetch(
-    `https://www.unpkg.com/web-features@${previousFeaturesVersion}/index.json`,
-  ).then((r) => r.json() as Promise<WebFeatures>)
+    `https://www.unpkg.com/web-features@${previousFeaturesVersion}/data.json`,
+  ).then((r) => r.json() as Promise<{ features: WebFeatures }>)
   const latestFeatures = await fetch(
-    `https://www.unpkg.com/web-features@${nextFeaturesVersion}/index.json`,
-  ).then((r) => r.json() as Promise<WebFeatures>)
+    `https://www.unpkg.com/web-features@${nextFeaturesVersion}/data.json`,
+  ).then((r) => r.json() as Promise<{ features: WebFeatures }>)
 
   await env.KV.put('previousVersion', nextFeaturesVersion)
 
-  const updatedFeatures = getUpdatedFeatures(previousFeatures, latestFeatures)
+  const updatedFeatures = getUpdatedFeatures(
+    previousFeatures.features,
+    latestFeatures.features,
+  )
+  console.log(updatedFeatures)
+
   await notify(updatedFeatures, env)
 }

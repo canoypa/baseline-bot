@@ -17,7 +17,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
       'feature-2': {
         name: 'Feature 2',
@@ -27,7 +27,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: { chrome: '0' },
         },
-        spec: [],
+        spec: '',
       },
     }
 
@@ -40,7 +40,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
       'feature-2': {
         name: 'Feature 2',
@@ -50,7 +50,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: { chrome: '0' },
         },
-        spec: [],
+        spec: '',
       },
     }
 
@@ -67,7 +67,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
       'feature-2': {
         name: 'Feature 2',
@@ -77,7 +77,7 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: {},
         },
-        spec: [],
+        spec: '',
       },
     }
 
@@ -90,7 +90,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
       'feature-2': {
         name: 'Feature 2',
@@ -100,7 +100,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
     }
 
@@ -113,7 +113,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
       {
         name: 'Feature 2',
@@ -123,7 +123,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: {},
         },
-        spec: [],
+        spec: '',
       },
     ])
   })
@@ -138,7 +138,7 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: {},
         },
-        spec: [],
+        spec: '',
       },
     }
 
@@ -151,7 +151,7 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: { chrome: '0' },
         },
-        spec: [],
+        spec: '',
       },
     }
 
@@ -164,7 +164,7 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: { chrome: '0' },
         },
-        spec: [],
+        spec: '',
       },
     ])
   })
@@ -302,7 +302,7 @@ spec:
         support: {},
       },
       spec: 'https://example.com',
-      caniuse: 'https://caniuse.exmaple.com',
+      caniuse: 'feature-name',
     }
 
     expect(getNoteContent(feature)).toBe(`Feature name
@@ -311,7 +311,7 @@ spec:
 ----
 Feature description
 
-caniuse: https://caniuse.exmaple.com
+caniuse: https://caniuse.com/feature-name
 spec: https://example.com`)
   })
 })
