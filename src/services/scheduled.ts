@@ -59,7 +59,7 @@ export const getBrowserSupports = (support: SupportBrowser) => {
 }
 
 export const getNoteContent = (feature: WebFeature) => {
-  let content = `<plain>${feature.name}\n\n`
+  let content = `${feature.name}\n\n`
 
   if (feature.status.baseline === 'high') {
     content += `✅ Widely available!\n`
@@ -84,7 +84,7 @@ export const getNoteContent = (feature: WebFeature) => {
     content += `Safari ${emoji(support.safari)}\n`
   }
 
-  content += `----\n${feature.description}</plain>\n\n`
+  content += `----\n${feature.description}\n\n`
 
   if (feature.caniuse) {
     content += `caniuse: https://caniuse.com/${feature.caniuse}\n`
@@ -110,6 +110,7 @@ const notify = async (features: WebFeature[], env: Bindings) => {
       body: JSON.stringify({
         visibility: 'home',
         text: getNoteContent(feature),
+        noExtractMentions: true,
       }),
     })
       .then((res) => {

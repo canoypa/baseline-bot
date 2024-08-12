@@ -217,11 +217,11 @@ describe('getNoteContent', () => {
       spec: 'https://example.com',
     }
 
-    expect(getNoteContent(feature)).toBe(`<plain>Feature name
+    expect(getNoteContent(feature)).toBe(`Feature name
 
 ✅ Widely available!
 ----
-Feature description</plain>
+Feature description
 
 spec: https://example.com`)
   })
@@ -238,11 +238,11 @@ spec: https://example.com`)
       spec: 'https://example.com',
     }
 
-    expect(getNoteContent(feature)).toBe(`<plain>Feature name
+    expect(getNoteContent(feature)).toBe(`Feature name
 
 ☑️ Newly available!
 ----
-Feature description</plain>
+Feature description
 
 spec: https://example.com`)
   })
@@ -259,12 +259,12 @@ spec: https://example.com`)
       spec: 'https://example.com',
     }
 
-    expect(getNoteContent(feature)).toBe(`<plain>Feature name
+    expect(getNoteContent(feature)).toBe(`Feature name
 
 ⚠️ Limited availability!
 Chrome ✅ / Edge ❌ / Firefox ❌ / Safari ❌
 ----
-Feature description</plain>
+Feature description
 
 spec: https://example.com`)
   })
@@ -281,11 +281,11 @@ spec: https://example.com`)
       spec: ['https://1.example.com', 'https://2.example.com'],
     }
 
-    expect(getNoteContent(feature)).toBe(`<plain>Feature name
+    expect(getNoteContent(feature)).toBe(`Feature name
 
 ✅ Widely available!
 ----
-Feature description</plain>
+Feature description
 
 spec:
     - https://1.example.com
@@ -305,11 +305,11 @@ spec:
       caniuse: 'feature-name',
     }
 
-    expect(getNoteContent(feature)).toBe(`<plain>Feature name
+    expect(getNoteContent(feature)).toBe(`Feature name
 
 ✅ Widely available!
 ----
-Feature description</plain>
+Feature description
 
 caniuse: https://caniuse.com/feature-name
 spec: https://example.com`)
