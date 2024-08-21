@@ -23,7 +23,7 @@ export const getUpdatedFeatures = (
     const previous = previousFeatures[key]
 
     // New feature
-    if (!previous) {
+    if (!previous && latest.status.baseline !== 'high') {
       result.push(latest)
       continue
     }
