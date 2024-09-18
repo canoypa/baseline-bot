@@ -23,8 +23,12 @@ export const getUpdatedFeatures = (
     const previous = previousFeatures[key]
 
     // New feature
-    if (!previous && latest.status.baseline !== 'high') {
+    if (!previous) {
+      // 登録時点で widely available なら通知しない
+      if (latest.status.baseline !== 'high') {
       result.push(latest)
+      }
+
       continue
     }
 
