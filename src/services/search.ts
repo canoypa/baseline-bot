@@ -4,9 +4,9 @@ import { type WebFeatures } from '../web_features'
 export const searchFeature = async (query: string) => {
   const features = await fetch(
     'https://www.unpkg.com/web-features@latest/index.json',
-  ).then((r) => r.json() as Promise<WebFeatures>)
+  ).then((r) => r.json() as Promise<{ features: WebFeatures }>)
 
-  const fuse = new Fuse(Object.values(features), {
+  const fuse = new Fuse(Object.values(features.features), {
     keys: ['name', 'description'],
     includeScore: true,
   })
