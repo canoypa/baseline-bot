@@ -26,7 +26,7 @@ export const getUpdatedFeatures = (
     if (!previous) {
       // 登録時点で widely available なら通知しない
       if (latest.status.baseline !== 'high') {
-      result.push(latest)
+        result.push(latest)
       }
 
       continue
@@ -63,7 +63,7 @@ export const getBrowserSupports = (support: SupportBrowser) => {
 }
 
 export const getNoteContent = (feature: WebFeature) => {
-  let content = `${feature.name}\n\n`
+  let content = `<plain>${feature.name}\n\n`
 
   if (feature.status.baseline === 'high') {
     content += `✅ Widely available!\n`
@@ -99,6 +99,8 @@ export const getNoteContent = (feature: WebFeature) => {
   } else {
     content += feature.spec.reduce((acc, s) => `${acc}\n    - ${s}`, 'spec:')
   }
+
+  content += '</plain>'
 
   return content
 }
