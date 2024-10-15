@@ -63,7 +63,7 @@ export const getBrowserSupports = (support: SupportBrowser) => {
 }
 
 export const getNoteContent = (feature: WebFeature) => {
-  let content = `<plain>${feature.name}\n\n`
+  let content = `<plain>${feature.name}</plain>\n\n`
 
   if (feature.status.baseline === 'high') {
     content += `✅ Widely available!\n`
@@ -88,7 +88,7 @@ export const getNoteContent = (feature: WebFeature) => {
     content += `Safari ${emoji(support.safari)}\n`
   }
 
-  content += `----\n${feature.description}\n\n`
+  content += `----\n<plain>${feature.description}</plain>\n\n`
 
   if (feature.caniuse) {
     content += `caniuse: https://caniuse.com/${feature.caniuse}\n`
@@ -99,8 +99,6 @@ export const getNoteContent = (feature: WebFeature) => {
   } else {
     content += feature.spec.reduce((acc, s) => `${acc}\n    - ${s}`, 'spec:')
   }
-
-  content += '</plain>'
 
   return content
 }
