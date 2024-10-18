@@ -63,7 +63,7 @@ export const getBrowserSupports = (support: SupportBrowser) => {
 }
 
 export const getNoteContent = (feature: WebFeature) => {
-  let content = `<plain>${feature.name}</plain>\n\n`
+  let content = `${feature.name}\n\n`.replaceAll('@(.+)', '@\u{200B}$1')
 
   if (feature.status.baseline === 'high') {
     content += `✅ Widely available!\n`
@@ -88,7 +88,10 @@ export const getNoteContent = (feature: WebFeature) => {
     content += `Safari ${emoji(support.safari)}\n`
   }
 
-  content += `----\n<plain>${feature.description}</plain>\n\n`
+  content += `----\n${feature.description}\n\n`.replaceAll(
+    '@(.+)',
+    '@\u{200B}$1',
+  )
 
   if (feature.caniuse) {
     content += `caniuse: https://caniuse.com/${feature.caniuse}\n`
