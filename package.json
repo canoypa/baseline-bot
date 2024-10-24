@@ -6,7 +6,8 @@
   },
   "dependencies": {
     "fuse.js": "^7.0.0",
-    "hono": "^4.6.5"
+    "hono": "^4.6.5",
+    "valibot": "^0.42.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.1",
