@@ -1,11 +1,15 @@
-import type { Bindings } from '../env'
+import { packageJsonSchema } from '../core/web_features/schemas/package'
 import {
   type BaselineIdentifier,
   type BrowserIdentifier,
   type SupportBrowser,
-  type WebFeature,
+  type WebFeatureData,
   type WebFeatures,
-} from '../web_features'
+  WebFeaturesData,
+} from '../core/web_features/schemas/web_feature'
+import { buildPackageUrl } from '../core/web_features/utils'
+import type { Bindings } from '../env'
+import { fetchWithParse } from '../utils/fetch_with_parse'
 
 export type KvStore = {
   baseline: BaselineIdentifier | false
@@ -16,7 +20,7 @@ export const getUpdatedFeatures = (
   previousFeatures: WebFeatures,
   latestFeatures: WebFeatures,
 ) => {
-  const result: WebFeature[] = []
+  const result: WebFeatureData[] = []
 
   for (const key in latestFeatures) {
     const latest = latestFeatures[key]
@@ -62,7 +66,7 @@ export const getBrowserSupports = (support: SupportBrowser) => {
   }
 }
 
-export const getNoteContent = (feature: WebFeature) => {
+export const getNoteContent = (feature: WebFeatureData) => {
   let content = `${feature.name}\n\n`.replaceAll('@(.+)', '@\u{200B}$1')
 
   if (feature.status.baseline === 'high') {
@@ -106,7 +110,7 @@ export const getNoteContent = (feature: WebFeature) => {
   return content
 }
 
-const notify = async (features: WebFeature[], env: Bindings) => {
+const notify = async (features: WebFeatureData[], env: Bindings) => {
   for (const feature of features) {
     await fetch('https://misskey.io/api/notes/create', {
       method: 'POST',
@@ -141,23 +145,27 @@ export const scheduledTask = async (
   env: Bindings,
   _c: ExecutionContext,
 ) => {
-  const previousFeaturesVersion = await env.KV.get('previousVersion')
+  const nextPackageJson = await fetchWithParse(
+    packageJsonSchema,
+    buildPackageUrl('next', 'package.json'),
+  )
+  const nextFeaturesVersion = nextPackageJson.version
 
-  const nextPackage = await fetch(
-    'https://www.unpkg.com/web-features@next/package.json',
-  ).then((r) => r.json() as Promise<{ version: string }>)
-  const nextFeaturesVersion = nextPackage.version
+  const previousFeaturesVersion =
+    (await env.KV.get('previousVersion')) ?? nextFeaturesVersion
 
   if (previousFeaturesVersion === nextFeaturesVersion) {
     return
   }
 
-  const previousFeatures = await fetch(
-    `https://www.unpkg.com/web-features@${previousFeaturesVersion}/data.json`,
-  ).then((r) => r.json() as Promise<{ features: WebFeatures }>)
-  const latestFeatures = await fetch(
-    `https://www.unpkg.com/web-features@${nextFeaturesVersion}/data.json`,
-  ).then((r) => r.json() as Promise<{ features: WebFeatures }>)
+  const previousFeatures = await fetchWithParse(
+    WebFeaturesData,
+    buildPackageUrl(previousFeaturesVersion, '/data.json'),
+  )
+  const latestFeatures = await fetchWithParse(
+    WebFeaturesData,
+    buildPackageUrl(nextFeaturesVersion, '/data.json'),
+  )
 
   await env.KV.put('previousVersion', nextFeaturesVersion)
 
