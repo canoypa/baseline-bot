@@ -1,0 +1,9 @@
+name = "baseline-bot"
+compatibility_date = "2024-11-11"
+
+[[kv_namespaces]]
+binding = "KV"
+id = 721084bbcf604e47b8e29fa5356f8f5a
+
+[triggers]
+crons = ["0 0 * * *"]
