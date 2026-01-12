@@ -1,12 +1,12 @@
-import type { Context } from 'hono'
 import type { Bindings } from '../env'
 import type { MisskeyWebhookMentioned } from '../misskey'
 import { getNoteContent } from './scheduled'
 import { searchFeature } from './search'
 
-export const webhookMentioned = async (c: Context<{ Bindings: Bindings }>) => {
-  const payload = await c.req.json<MisskeyWebhookMentioned>()
-
+export const webhookMentioned = async (
+  payload: MisskeyWebhookMentioned,
+  env: Bindings,
+) => {
   const note = payload.body.note
 
   // dm には反応しない
@@ -20,7 +20,7 @@ export const webhookMentioned = async (c: Context<{ Bindings: Bindings }>) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${c.env.MISSKEY_TOKEN}`,
+        Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
       },
       body: JSON.stringify({
         visibility: note.visibility,
@@ -47,7 +47,7 @@ export const webhookMentioned = async (c: Context<{ Bindings: Bindings }>) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${c.env.MISSKEY_TOKEN}`,
+          Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
         },
         body: JSON.stringify({
           visibility: note.visibility,
@@ -64,7 +64,7 @@ export const webhookMentioned = async (c: Context<{ Bindings: Bindings }>) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${c.env.MISSKEY_TOKEN}`,
+          Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
         },
         body: JSON.stringify({
           visibility: note.visibility,
@@ -80,7 +80,7 @@ export const webhookMentioned = async (c: Context<{ Bindings: Bindings }>) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${c.env.MISSKEY_TOKEN}`,
+        Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
       },
       body: JSON.stringify({
         visibility: note.visibility,

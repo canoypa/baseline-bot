@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { Bindings } from './env'
+import type { MisskeyWebhookMentioned } from './misskey'
 import { scheduledTask } from './services/scheduled'
 import { webhookMentioned } from './services/webhook_mentioned'
 import { webhookSecret } from './webhook_secret_middleware'
@@ -20,7 +21,8 @@ app.post(
     return middleware(c, next)
   },
   async (c) => {
-    c.executionCtx.waitUntil(webhookMentioned(c))
+    const payload = await c.req.json<MisskeyWebhookMentioned>()
+    c.executionCtx.waitUntil(webhookMentioned(payload, c.env))
     return c.text('OK', 200)
   },
 )
