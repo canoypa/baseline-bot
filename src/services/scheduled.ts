@@ -2,10 +2,10 @@ import { packageJsonSchema } from '../core/web_features/schemas/package'
 import {
   type BaselineIdentifier,
   type BrowserIdentifier,
+  type Features,
   type SupportBrowser,
   type WebFeatureData,
-  type WebFeatures,
-  WebFeaturesData,
+  WebFeatures,
 } from '../core/web_features/schemas/web_feature'
 import { buildPackageUrl } from '../core/web_features/utils'
 import type { Bindings } from '../env'
@@ -17,14 +17,19 @@ export type KvStore = {
 }
 
 export const getUpdatedFeatures = (
-  previousFeatures: WebFeatures,
-  latestFeatures: WebFeatures,
+  previousFeatures: Features,
+  latestFeatures: Features,
 ) => {
   const result: WebFeatureData[] = []
 
   for (const key in latestFeatures) {
     const latest = latestFeatures[key]
     const previous = previousFeatures[key]
+
+    // moved/split は現状スキップ（kind: 'feature' のみ処理）
+    if (latest.kind !== 'feature') {
+      continue
+    }
 
     // New feature
     if (!previous) {
@@ -33,6 +38,11 @@ export const getUpdatedFeatures = (
         result.push(latest)
       }
 
+      continue
+    }
+
+    // previous が feature でない場合はスキップ
+    if (previous.kind !== 'feature') {
       continue
     }
 
@@ -159,11 +169,11 @@ export const scheduledTask = async (
   }
 
   const previousFeatures = await fetchWithParse(
-    WebFeaturesData,
+    WebFeatures,
     buildPackageUrl(previousFeaturesVersion, '/data.json'),
   )
   const latestFeatures = await fetchWithParse(
-    WebFeaturesData,
+    WebFeatures,
     buildPackageUrl(nextFeaturesVersion, '/data.json'),
   )
 

@@ -1,12 +1,21 @@
 import Fuse from 'fuse.js'
-import { type WebFeatures } from '../web_features'
+import {
+  WebFeatures,
+  type WebFeatureData,
+} from '../core/web_features/schemas/web_feature'
+import { fetchWithParse } from '../utils/fetch_with_parse'
 
 export const searchFeature = async (query: string) => {
-  const features = await fetch(
+  const features = await fetchWithParse(
+    WebFeatures,
     'https://www.unpkg.com/web-features@latest/data.json',
-  ).then((r) => r.json() as Promise<{ features: WebFeatures }>)
+  )
 
-  const fuse = new Fuse(Object.values(features.features), {
+  const featureList = Object.values(features.features).filter(
+    (feature): feature is WebFeatureData => feature.kind === 'feature',
+  )
+
+  const fuse = new Fuse(featureList, {
     keys: ['name', 'description'],
     includeScore: true,
   })

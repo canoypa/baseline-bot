@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { SupportBrowser, WebFeature, WebFeatures } from '../web_features'
+import type {
+  Features,
+  SupportBrowser,
+  WebFeatureData,
+} from '../core/web_features/schemas/web_feature'
 import {
   getBrowserSupports,
   getNoteContent,
@@ -8,8 +12,9 @@ import {
 
 describe('getUpdatedFeatures', () => {
   it('should return empty array when there are no updates', () => {
-    const previousFeatures: WebFeatures = {
+    const previousFeatures: Features = {
       'feature-1': {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -17,9 +22,10 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
       'feature-2': {
+        kind: 'feature',
         name: 'Feature 2',
         description: 'Feature 2 description',
         description_html: 'Feature 2 description',
@@ -27,12 +33,13 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: { chrome: '0' },
         },
-        spec: '',
+        spec: 'https://example.com/feature-2',
       },
     }
 
-    const latestFeatures: WebFeatures = {
+    const latestFeatures: Features = {
       'feature-1': {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -40,9 +47,10 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
       'feature-2': {
+        kind: 'feature',
         name: 'Feature 2',
         description: 'Feature 2 description',
         description_html: 'Feature 2 description',
@@ -50,7 +58,7 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: { chrome: '0' },
         },
-        spec: '',
+        spec: 'https://example.com/feature-2',
       },
     }
 
@@ -58,8 +66,9 @@ describe('getUpdatedFeatures', () => {
   })
 
   it('should return updated features when there are baseline updates', () => {
-    const previousFeatures: WebFeatures = {
+    const previousFeatures: Features = {
       'feature-1': {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -67,9 +76,10 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
       'feature-2': {
+        kind: 'feature',
         name: 'Feature 2',
         description: 'Feature 2 description',
         description_html: 'Feature 2 description',
@@ -77,12 +87,13 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-2',
       },
     }
 
-    const latestFeatures: WebFeatures = {
+    const latestFeatures: Features = {
       'feature-1': {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -90,9 +101,10 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
       'feature-2': {
+        kind: 'feature',
         name: 'Feature 2',
         description: 'Feature 2 description',
         description_html: 'Feature 2 description',
@@ -100,12 +112,13 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-2',
       },
     }
 
     expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([
       {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -113,9 +126,10 @@ describe('getUpdatedFeatures', () => {
           baseline: 'high',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
       {
+        kind: 'feature',
         name: 'Feature 2',
         description: 'Feature 2 description',
         description_html: 'Feature 2 description',
@@ -123,14 +137,15 @@ describe('getUpdatedFeatures', () => {
           baseline: 'low',
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-2',
       },
     ])
   })
 
   it('should return updated features when there are browser support updates', () => {
-    const previousFeatures: WebFeatures = {
+    const previousFeatures: Features = {
       'feature-1': {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -138,12 +153,13 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: {},
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
     }
 
-    const latestFeatures: WebFeatures = {
+    const latestFeatures: Features = {
       'feature-1': {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -151,12 +167,13 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: { chrome: '0' },
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
     }
 
     expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([
       {
+        kind: 'feature',
         name: 'Feature 1',
         description: 'Feature 1 description',
         description_html: 'Feature 1 description',
@@ -164,7 +181,7 @@ describe('getUpdatedFeatures', () => {
           baseline: false,
           support: { chrome: '0' },
         },
-        spec: '',
+        spec: 'https://example.com/feature-1',
       },
     ])
   })
@@ -206,7 +223,8 @@ describe('getBrowserSupports', () => {
 
 describe('getNoteContent', () => {
   it('should return a note content for a feature with high baseline', () => {
-    const feature: WebFeature = {
+    const feature: WebFeatureData = {
+      kind: 'feature',
       name: 'Feature name',
       description: 'Feature description',
       description_html: 'Feature description',
@@ -227,7 +245,8 @@ spec: https://example.com`)
   })
 
   it('should return a note content for a feature with low baseline', () => {
-    const feature: WebFeature = {
+    const feature: WebFeatureData = {
+      kind: 'feature',
       name: 'Feature name',
       description: 'Feature description',
       description_html: 'Feature description',
@@ -248,7 +267,8 @@ spec: https://example.com`)
   })
 
   it('should return a note content for a feature with limited availability', () => {
-    const feature: WebFeature = {
+    const feature: WebFeatureData = {
+      kind: 'feature',
       name: 'Feature name',
       description: 'Feature description',
       description_html: 'Feature description',
@@ -270,7 +290,8 @@ spec: https://example.com`)
   })
 
   it('should return a note content with multiple specs', () => {
-    const feature: WebFeature = {
+    const feature: WebFeatureData = {
+      kind: 'feature',
       name: 'Feature name',
       description: 'Feature description',
       description_html: 'Feature description',
@@ -293,7 +314,8 @@ spec:
   })
 
   it('should return a note content with caniuse', () => {
-    const feature: WebFeature = {
+    const feature: WebFeatureData = {
+      kind: 'feature',
       name: 'Feature name',
       description: 'Feature description',
       description_html: 'Feature description',

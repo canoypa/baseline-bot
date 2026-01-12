@@ -36,10 +36,30 @@ export const webhookMentioned = async (c: Context<{ Bindings: Bindings }>) => {
   const queryPattern = /@baseline_bot\s+?(?:\s*\n)?(?<q>.+)/
   const match = note.text?.match(queryPattern)
   if (match && match.groups?.q) {
-    const feature = await searchFeature(match.groups.q)
+    const query = match.groups.q
 
-    if (!feature) {
-      const content = `No matching feature found for query: ${match.groups.q}`
+    let feature: Awaited<ReturnType<typeof searchFeature>>
+    try {
+      feature = await searchFeature(query)
+    } catch (error) {
+      const content = 'An internal error occurred.'
+      await fetch('https://misskey.io/api/notes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${c.env.MISSKEY_TOKEN}`,
+        },
+        body: JSON.stringify({
+          visibility: note.visibility,
+          text: content,
+          replyId: note.id,
+        }),
+      })
+      return
+    }
+
+    if (!feature || feature.kind !== 'feature') {
+      const content = `No matching feature found for query: ${query}`
       await fetch('https://misskey.io/api/notes/create', {
         method: 'POST',
         headers: {

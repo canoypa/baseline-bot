@@ -1,0 +1,136 @@
+name: Validate web-features schema
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: schema-validate
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      should-validate: ${{ steps.check-validation.outputs.should-validate }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Get latest web-features version
+        id: get-version
+        run: |
+          LATEST_VERSION=$(pnpm info web-features@next version)
+          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest web-features version: $LATEST_VERSION"
+
+      - name: Check cache for previous version
+        id: cache-version
+        uses: actions/cache@v4
+        with:
+          path: .web-features-version
+          key: web-features-${{ steps.get-version.outputs.version }}
+
+      - name: Check if validation needed
+        id: check-validation
+        run: |
+          if [ "${{ steps.cache-version.outputs.cache-hit }}" == "true" ]; then
+            echo "should-validate=false" >> $GITHUB_OUTPUT
+            CACHED=$(cat .web-features-version)
+            CACHED_VERSION=$(echo "$CACHED" | jq -r '.version')
+            CACHED_TIMESTAMP=$(echo "$CACHED" | jq -r '.timestamp')
+            echo "Version $CACHED_VERSION already validated at $CACHED_TIMESTAMP. Skipping."
+          else
+            echo "should-validate=true" >> $GITHUB_OUTPUT
+            echo "New version ${{ steps.get-version.outputs.version }} detected. Running validation."
+          fi
+
+  validate-schema:
+    needs: check-version
+    if: needs.check-version.outputs.should-validate == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run schema validation
+        id: validate
+        run: |
+          if ! pnpm exec tsx scripts/validate_web_features.ts | tee .web-features-version; then
+            echo "Schema validation returned non-zero (will create issue)."
+          fi
+
+          SUCCESS=$(jq -r '.success // false' .web-features-version 2>/dev/null || echo false)
+          VERSION=$(jq -r '.version // "unknown"' .web-features-version 2>/dev/null || echo unknown)
+
+          echo "success=$SUCCESS" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Save version cache
+        if: steps.validate.outputs.success == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .web-features-version
+          key: web-features-${{ steps.validate.outputs.version }}
+
+      - name: Create issue on schema error
+        if: always() && steps.validate.outputs.success != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(jq -r '.version // "unknown"' .web-features-version)
+          ERRORS=$(jq -c '.errors // []' .web-features-version)
+
+          TITLE="[web-features] Schema validation failed – update required (v${VERSION})"
+
+          EXISTING=$(gh issue list --state open --search "$TITLE" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            echo "Open issue already exists (#${EXISTING}); skipping create."
+            exit 0
+          fi
+
+          BODY=$(cat <<EOF
+          web-featuresのスキーマバリデーションに失敗しました。
+
+          バージョン: ${VERSION}
+
+          エラー内容:
+
+          \`\`\`json
+          ${ERRORS}
+          \`\`\`
+
+          新しいバージョンへの対応が必要です。
+          EOF
+          )
+
+          gh issue create \
+            --title "$TITLE" \
+            --body "$BODY"
+
+      - name: Fail job if validation failed
+        if: always() && steps.validate.outputs.success != 'true'
+        run: exit 1
