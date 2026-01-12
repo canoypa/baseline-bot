@@ -15,11 +15,10 @@ export const webhookSecret = ({ header, secret }: Args) => {
     }
 
     const authorized = await secureCompare(headerSecret, secret)
-
-    if (authorized) {
-      await next()
+    if (!authorized) {
+      return c.text('Unauthorized', 401)
     }
 
-    return c.text('Unauthorized', 401)
+    await next()
   })
 }

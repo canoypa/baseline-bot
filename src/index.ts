@@ -12,11 +12,13 @@ app.get('/', (c) => {
 
 app.post(
   '/webhook/mentioned',
-  (c) =>
-    webhookSecret({
+  (c, next) => {
+    const middleware = webhookSecret({
       header: 'X-Misskey-Hook-Secret',
       secret: c.env.MISSKEY_WEBHOOK_SECRET,
-    }),
+    })
+    return middleware(c, next)
+  },
   async (c) => {
     c.executionCtx.waitUntil(webhookMentioned(c))
     return c.text('OK', 200)
