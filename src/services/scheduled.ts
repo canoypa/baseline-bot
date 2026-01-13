@@ -157,7 +157,7 @@ export const scheduledTask = async (
 ) => {
   const nextPackageJson = await fetchWithParse(
     packageJsonSchema,
-    buildPackageUrl('next', 'package.json'),
+    buildPackageUrl('next', '/package.json'),
   )
   const nextFeaturesVersion = nextPackageJson.version
 
