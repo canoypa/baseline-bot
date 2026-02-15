@@ -118,26 +118,32 @@ describe('getUpdatedFeatures', () => {
 
     expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([
       {
-        kind: 'feature',
-        name: 'Feature 1',
-        description: 'Feature 1 description',
-        description_html: 'Feature 1 description',
-        status: {
-          baseline: 'high',
-          support: {},
+        featureKey: 'feature-1',
+        feature: {
+          kind: 'feature',
+          name: 'Feature 1',
+          description: 'Feature 1 description',
+          description_html: 'Feature 1 description',
+          status: {
+            baseline: 'high',
+            support: {},
+          },
+          spec: 'https://example.com/feature-1',
         },
-        spec: 'https://example.com/feature-1',
       },
       {
-        kind: 'feature',
-        name: 'Feature 2',
-        description: 'Feature 2 description',
-        description_html: 'Feature 2 description',
-        status: {
-          baseline: 'low',
-          support: {},
+        featureKey: 'feature-2',
+        feature: {
+          kind: 'feature',
+          name: 'Feature 2',
+          description: 'Feature 2 description',
+          description_html: 'Feature 2 description',
+          status: {
+            baseline: 'low',
+            support: {},
+          },
+          spec: 'https://example.com/feature-2',
         },
-        spec: 'https://example.com/feature-2',
       },
     ])
   })
@@ -173,15 +179,18 @@ describe('getUpdatedFeatures', () => {
 
     expect(getUpdatedFeatures(previousFeatures, latestFeatures)).toEqual([
       {
-        kind: 'feature',
-        name: 'Feature 1',
-        description: 'Feature 1 description',
-        description_html: 'Feature 1 description',
-        status: {
-          baseline: false,
-          support: { chrome: '0' },
+        featureKey: 'feature-1',
+        feature: {
+          kind: 'feature',
+          name: 'Feature 1',
+          description: 'Feature 1 description',
+          description_html: 'Feature 1 description',
+          status: {
+            baseline: false,
+            support: { chrome: '0' },
+          },
+          spec: 'https://example.com/feature-1',
         },
-        spec: 'https://example.com/feature-1',
       },
     ])
   })
