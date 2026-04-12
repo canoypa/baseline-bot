@@ -345,4 +345,48 @@ Feature description
 caniuse: https://caniuse.com/feature-name
 spec: https://example.com`)
   })
+
+  it('should insert U+2060 after @ in feature name to disable mentions', () => {
+    const feature: WebFeatureData = {
+      kind: 'feature',
+      name: '@mention in name',
+      description: 'Feature description',
+      description_html: 'Feature description',
+      status: {
+        baseline: 'high',
+        support: {},
+      },
+      spec: 'https://example.com',
+    }
+
+    expect(getNoteContent(feature)).toBe(`@\u{2060}mention in name
+
+✅ Widely available!
+----
+Feature description
+
+spec: https://example.com`)
+  })
+
+  it('should insert U+2060 after @ in feature description to disable mentions', () => {
+    const feature: WebFeatureData = {
+      kind: 'feature',
+      name: 'Feature name',
+      description: 'Description with @mention inside',
+      description_html: 'Description with @mention inside',
+      status: {
+        baseline: 'high',
+        support: {},
+      },
+      spec: 'https://example.com',
+    }
+
+    expect(getNoteContent(feature)).toBe(`Feature name
+
+✅ Widely available!
+----
+Description with @\u{2060}mention inside
+
+spec: https://example.com`)
+  })
 })
