@@ -128,16 +128,19 @@ export const getNoteContent = (feature: WebFeatureData) => {
   return content
 }
 
-const notify = async (features: UpdatedFeature[], env: Bindings) => {
+export const notify = async (features: UpdatedFeature[], env: Bindings) => {
+  let delivered = 0
+  let skipped = 0
+
   for (const { feature } of features) {
     // 1件失敗しても残りは投稿する
     try {
-      const data = await createNote(env, {
+      const result = await createNote(env, {
         visibility: 'home',
         text: getNoteContent(feature),
         noExtractMentions: true,
       })
-      console.log(data)
+      result.delivered ? delivered++ : skipped++
     } catch (e) {
       console.error(e)
     }
@@ -145,6 +148,8 @@ const notify = async (features: UpdatedFeature[], env: Bindings) => {
     // 負荷にならないように1秒待つ
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
+
+  return { delivered, skipped }
 }
 
 /**
@@ -192,6 +197,9 @@ export const scheduledTask = async (
     latestFeatures.features,
   )
 
+  // ゲートが閉じていて1件も配信していないなら、この差分は未処理として残す
+  let holdVersion = false
+
   try {
     if (updatedFeatures.length > 0) {
       // RSS履歴を更新（Misskey投稿とは独立して実行）
@@ -211,16 +219,20 @@ export const scheduledTask = async (
 
       // Misskey投稿（RSS更新とは独立して実行）
       try {
-        await notify(updatedFeatures, env)
+        const { delivered, skipped } = await notify(updatedFeatures, env)
+        // 1件も配信されず全件がゲートで止まったのは設定ミス。翌日に再検知させる
+        holdVersion = delivered === 0 && skipped > 0
       } catch (e) {
         console.error('Failed to notify Misskey', e)
       }
     }
   } finally {
-    // RSS/Misskey成功/失敗に関わらず、このバージョンを「処理済み」として記録
-    // （再実行防止と処理前進のため）
-    await env.KV.put('previousVersion', nextFeaturesVersion).catch((e) => {
-      console.error('Failed to update previousVersion', e)
-    })
+    // 投稿の成否に関わらず「処理済み」として記録する（再実行防止と処理前進のため）。
+    // ただし holdVersion のときは記録しない
+    if (!holdVersion) {
+      await env.KV.put('previousVersion', nextFeaturesVersion).catch((e) => {
+        console.error('Failed to update previousVersion', e)
+      })
+    }
   }
 }

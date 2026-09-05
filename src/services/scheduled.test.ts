@@ -1,13 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type {
   Features,
   SupportBrowser,
   WebFeatureData,
 } from '../core/web_features/schemas/web_feature'
+import type { Bindings } from '../env'
 import {
   getBrowserSupports,
   getNoteContent,
   getUpdatedFeatures,
+  notify,
 } from './scheduled'
 
 describe('getUpdatedFeatures', () => {
@@ -344,5 +346,80 @@ Feature description
 
 caniuse: https://caniuse.com/feature-name
 spec: https://example.com`)
+  })
+})
+
+describe('notify', () => {
+  const feature: WebFeatureData = {
+    kind: 'feature',
+    name: 'Feature name',
+    description: 'Feature description',
+    description_html: 'Feature description',
+    status: {
+      baseline: 'high',
+      support: {},
+    },
+    spec: 'https://example.com',
+  }
+  const updated = [
+    { featureKey: 'feature-1', feature },
+    { featureKey: 'feature-2', feature },
+  ]
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  const run = async (env: Bindings) => {
+    vi.useFakeTimers()
+    const pending = notify(updated, env)
+    await vi.runAllTimersAsync()
+    return pending
+  }
+
+  it('counts every note as skipped while the gate is closed', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    expect(await run({ MISSKEY_TOKEN: 'test-token' } as Bindings)).toEqual({
+      delivered: 0,
+      skipped: 2,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('counts delivered notes when the gate is open', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('{}', { status: 200 })),
+    )
+
+    expect(
+      await run({
+        MISSKEY_TOKEN: 'test-token',
+        MISSKEY_DELIVER: 'true',
+      } as Bindings),
+    ).toEqual({ delivered: 2, skipped: 0 })
+  })
+
+  it('counts neither when delivery fails, so the version still advances', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response('Unauthorized', {
+            status: 401,
+            statusText: 'Unauthorized',
+          }),
+      ),
+    )
+
+    expect(
+      await run({
+        MISSKEY_TOKEN: 'test-token',
+        MISSKEY_DELIVER: 'true',
+      } as Bindings),
+    ).toEqual({ delivered: 0, skipped: 0 })
   })
 })
