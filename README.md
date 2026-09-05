@@ -13,7 +13,7 @@ npm run deploy
 
 `createNote()` は `MISSKEY_DELIVER === "true"` のときだけ実際に投稿し、それ以外は本文をログに出す。
 
-この目印は `wrangler.toml` の `[env.production.vars]` にしか無い。vars は環境間で継承されないので、`wrangler dev` の設定には現れない。よってローカル実行は、KV に何を仕込んでどの経路を走らせても `@baseline_bot` として投稿しない。
+この目印は `wrangler.toml` の `[env.production.vars]` にしか無い。vars は環境間で継承されないので、`wrangler dev` には現れない。
 
 - **本番**: `npm run deploy`（`wrangler deploy --env production`）で目印が付く。素の `wrangler deploy` を手打ちすると目印が付かず bot が黙る。
 - **ローカルで実配信を確認したいとき**: `.dev.vars` に `MISSKEY_DELIVER=true` と実 token を入れる。終わったら消す。

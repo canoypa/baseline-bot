@@ -8,7 +8,7 @@ id = "721084bbcf604e47b8e29fa5356f8f5a"
 [triggers]
 crons = ["0 0 * * *"]
 
-# 本番デプロイ。vars / kv_namespaces は環境間で継承されないので明示する。
+# vars / kv_namespaces は環境間で継承されないので明示する。
 [env.production]
 name = "baseline-bot"
 
