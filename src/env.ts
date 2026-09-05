@@ -3,4 +3,6 @@ export type Bindings = {
 
   MISSKEY_TOKEN: string
   MISSKEY_WEBHOOK_SECRET: string
+
+  MISSKEY_DELIVER?: string
 }

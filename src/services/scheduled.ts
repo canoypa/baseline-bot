@@ -9,6 +9,7 @@ import {
 } from '../core/web_features/schemas/web_feature'
 import { buildPackageUrl } from '../core/web_features/utils'
 import type { Bindings } from '../env'
+import { createNote } from '../misskey'
 import { fetchWithParse } from '../utils/fetch_with_parse'
 import {
   buildRssItemsForUpdates,
@@ -129,28 +130,17 @@ export const getNoteContent = (feature: WebFeatureData) => {
 
 const notify = async (features: UpdatedFeature[], env: Bindings) => {
   for (const { feature } of features) {
-    await fetch('https://misskey.io/api/notes/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
-      },
-      body: JSON.stringify({
+    // 1件失敗しても残りは投稿する
+    try {
+      const data = await createNote(env, {
         visibility: 'home',
         text: getNoteContent(feature),
         noExtractMentions: true,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Failed to create note: ${res.statusText}`)
-        return res.json()
       })
-      .then((data) => {
-        console.log(data)
-      })
-      .catch((e) => {
-        console.error(e)
-      })
+      console.log(data)
+    } catch (e) {
+      console.error(e)
+    }
 
     // 負荷にならないように1秒待つ
     await new Promise((resolve) => setTimeout(resolve, 1000))

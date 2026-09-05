@@ -7,3 +7,14 @@ id = "721084bbcf604e47b8e29fa5356f8f5a"
 
 [triggers]
 crons = ["0 0 * * *"]
+
+# vars / kv_namespaces は環境間で継承されないので明示する。
+[env.production]
+name = "baseline-bot"
+
+[env.production.vars]
+MISSKEY_DELIVER = "true"
+
+[[env.production.kv_namespaces]]
+binding = "KV"
+id = "721084bbcf604e47b8e29fa5356f8f5a"
