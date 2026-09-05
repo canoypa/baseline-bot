@@ -1,5 +1,5 @@
 import type { Bindings } from '../env'
-import type { MisskeyWebhookMentioned } from '../misskey'
+import { type MisskeyWebhookMentioned, createNote } from '../misskey'
 import { getNoteContent } from './scheduled'
 import { searchFeature } from './search'
 
@@ -16,17 +16,10 @@ export const webhookMentioned = async (
 
   // ping-pong
   if (note.text?.includes('ping')) {
-    await fetch('https://misskey.io/api/notes/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
-      },
-      body: JSON.stringify({
-        visibility: note.visibility,
-        text: 'PONG!',
-        replyId: payload.body.note.id,
-      }),
+    await createNote(env, {
+      visibility: note.visibility,
+      text: 'PONG!',
+      replyId: note.id,
     })
 
     return
@@ -42,51 +35,27 @@ export const webhookMentioned = async (
     try {
       feature = await searchFeature(query)
     } catch (error) {
-      const content = 'An internal error occurred.'
-      await fetch('https://misskey.io/api/notes/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
-        },
-        body: JSON.stringify({
-          visibility: note.visibility,
-          text: content,
-          replyId: note.id,
-        }),
+      await createNote(env, {
+        visibility: note.visibility,
+        text: 'An internal error occurred.',
+        replyId: note.id,
       })
       return
     }
 
     if (!feature || feature.kind !== 'feature') {
-      const content = `No matching feature found for query: ${query}`
-      await fetch('https://misskey.io/api/notes/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
-        },
-        body: JSON.stringify({
-          visibility: note.visibility,
-          text: content,
-          replyId: note.id,
-        }),
+      await createNote(env, {
+        visibility: note.visibility,
+        text: `No matching feature found for query: ${query}`,
+        replyId: note.id,
       })
       return
     }
 
-    const content = getNoteContent(feature)
-    await fetch('https://misskey.io/api/notes/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.MISSKEY_TOKEN}`,
-      },
-      body: JSON.stringify({
-        visibility: note.visibility,
-        text: content,
-        replyId: note.id,
-      }),
+    await createNote(env, {
+      visibility: note.visibility,
+      text: getNoteContent(feature),
+      replyId: note.id,
     })
 
     return
