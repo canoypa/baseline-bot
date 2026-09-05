@@ -2,10 +2,10 @@ import * as v from 'valibot'
 
 export const fetchWithParse = async <T extends v.BaseSchema<any, any, any>>(
   schema: T,
-  input: RequestInfo,
+  input: RequestInfo | URL,
   init?: RequestInit,
 ) => {
-  const response = await fetch(input, init)
+  const response = await fetch(input instanceof URL ? input.href : input, init)
   const contentType = response.headers.get('content-type') ?? ''
   const clone = response.clone()
 
