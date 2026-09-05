@@ -17,13 +17,10 @@ type CreateNoteParams = {
   noExtractMentions?: boolean
 }
 
-export const createNote = async (
-  env: Bindings,
-  params: CreateNoteParams,
-): Promise<{ delivered: boolean }> => {
+export const createNote = async (env: Bindings, params: CreateNoteParams) => {
   if (env.MISSKEY_DELIVER !== 'true') {
     console.info(`[misskey] 未配信:\n${params.text}`)
-    return { delivered: false }
+    return
   }
 
   const res = await fetch('https://misskey.io/api/notes/create', {
@@ -39,5 +36,5 @@ export const createNote = async (
     throw new Error(`notes/create failed: ${res.status} ${res.statusText}`)
   }
 
-  return { delivered: true }
+  return res.json()
 }
